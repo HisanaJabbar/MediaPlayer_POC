@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hisana.mediaplayer.databinding.ItemsMediaPlayerListBinding
 
 class MediaPlayerListAdapter(
-    private val data : List<Data>
+    private val data : List<DataOne >
 ):RecyclerView.Adapter<MediaPlayerListAdapter.MediaPlayerListViewHolder>(){
     inner class MediaPlayerListViewHolder(val binding : ItemsMediaPlayerListBinding):RecyclerView.ViewHolder(binding.root)
 
@@ -28,10 +28,16 @@ class MediaPlayerListAdapter(
             tvArtistName.text = item.artist
 
             root.setOnClickListener {
-                val uriString = item.uri.toString()
+                val uriString = item.uri
+                val songs = ArrayList(data)
+
                 Log.d("TAG","URI : $uriString")
+
                 val intent = Intent(root.context,MediaPlayerActivity::class.java).apply {
                     putExtra("MUSIC_URI",uriString)
+                    putExtra("CURRENT_POSITION",position)
+                    putParcelableArrayListExtra("SONGS_LIST", songs)
+
                 }
                 root.context.startActivity(intent)
             }

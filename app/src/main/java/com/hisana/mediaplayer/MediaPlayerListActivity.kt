@@ -17,7 +17,7 @@ import com.hisana.mediaplayer.databinding.ActivityMediaPlayerListBinding
 class MediaPlayerListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMediaPlayerListBinding
-    private var musicList = mutableListOf<Data>()
+    private var musicList = mutableListOf<DataOne>()
     private lateinit var adapter: MediaPlayerListAdapter
 
     companion object{
@@ -99,7 +99,7 @@ class MediaPlayerListActivity : AppCompatActivity() {
 
                 Log.d("TAG","URI: $contentUri,Title:$title,Artist:$artist")
 
-                musicList += Data(contentUri,title,artist)
+                musicList += DataOne(contentUri,title,artist)
 
             }
             adapter.notifyDataSetChanged()

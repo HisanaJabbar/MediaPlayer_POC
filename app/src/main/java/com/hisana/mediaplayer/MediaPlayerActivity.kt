@@ -2,6 +2,7 @@ package com.hisana.mediaplayer
 
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -11,11 +12,15 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import java.util.concurrent.TimeUnit
 
 class MediaPlayerActivity : AppCompatActivity() {
 
     private lateinit var mediaPlayer: MediaPlayer
+
+    //private lateinit var musicList : ArrayList<DataOne>
+    private var currentPosition : Int = 0
 
     private lateinit var seekBar : SeekBar
     private lateinit var textCurrentTime : TextView
@@ -23,6 +28,8 @@ class MediaPlayerActivity : AppCompatActivity() {
     private lateinit var playBtn : ImageView
     private lateinit var pauseBtn : ImageView
     private lateinit var stopBtn : ImageView
+    private lateinit var nextBtn : ImageView
+    private lateinit var previousBtn : ImageView
 
     private val handler = Handler(Looper.getMainLooper())//it will update seek bar and current time text in every sec
 
@@ -37,6 +44,8 @@ class MediaPlayerActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)//getParcelableArrayListExtra is deprecated so we have to add this for adding data class
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_player)
@@ -47,6 +56,17 @@ class MediaPlayerActivity : AppCompatActivity() {
         playBtn = findViewById(R.id.buttonPlay)
         pauseBtn = findViewById(R.id.buttonPause)
         stopBtn = findViewById(R.id.buttonStop)
+        nextBtn = findViewById(R.id.buttonPlayNext)
+        previousBtn = findViewById(R.id.buttonPlayBack)
+
+        Log.d("TAG", "Intent has song list? ${intent.hasExtra("SONGS_LIST")}")
+
+         val musicList = intent.getParcelableArrayListExtra<DataOne>("SONGS_LIST")!!
+        for(item in musicList){
+            Log.d("TAG","MUSIC LIST : $item")
+        }
+
+        currentPosition = intent.getIntExtra("CURRENT_POSITION",0)
 
         val musicString = intent.getStringExtra("MUSIC_URI")
 
@@ -63,15 +83,6 @@ class MediaPlayerActivity : AppCompatActivity() {
         }
         val musicUri = Uri.parse(musicString)
 
-        /*mediaPlayer = MediaPlayer().apply {
-            setDataSource(this@MediaPlayerActivity,musicUri)
-            setOnPreparedListener{
-                seekBar.max = it.duration
-                textTotalTime.text = formatTime(it.duration)
-            }
-            prepareAsync()
-        }*/
-
         mediaPlayer = MediaPlayer.create(this,musicUri)//create MediaPlayer instance with audio
 
         mediaPlayer.setOnPreparedListener{
@@ -82,6 +93,8 @@ class MediaPlayerActivity : AppCompatActivity() {
         playBtn.setOnClickListener{
             mediaPlayer?.start()
             handler.post(updateSeekbar)
+            Log.d("TAG","Current Position : $currentPosition")
+
         }
 
         pauseBtn.setOnClickListener{
@@ -114,8 +127,43 @@ class MediaPlayerActivity : AppCompatActivity() {
                 override fun onStopTrackingTouch(seekBar: SeekBar) {
                 }
 
-            })
+            }
+        )
 
+        nextBtn.setOnClickListener{
+            if(musicList.isNotEmpty()){
+                currentPosition = (currentPosition + 1)
+                Log.d("TAG","Current Position after clicking next button : $currentPosition")
+
+                val nextSong = musicList[currentPosition]
+                Log.d("TAG","NextSong : ${nextSong}")
+                if(nextSong.uri.isNotEmpty()){
+                    playNextSong(nextSong.uri)
+                }else{
+                    Toast.makeText(this,"Song not available",Toast.LENGTH_SHORT).show()
+                }
+            }else{
+                Toast.makeText(this,"Music List is Empty",Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
+    }
+
+    private fun playNextSong(uriSong : String){
+        val uri = Uri.parse(uriSong)
+
+        if(::mediaPlayer.isInitialized) {
+            mediaPlayer.release()
+        }
+        mediaPlayer = MediaPlayer().apply {
+            setDataSource(this@MediaPlayerActivity,uri)
+            prepare()
+            start()
+        }
+        seekBar.max = mediaPlayer.duration
+        textTotalTime.text = formatTime(mediaPlayer.duration)
+        handler.post(updateSeekbar)
     }
 
     private fun formatTime(milliseconds: Int):String{

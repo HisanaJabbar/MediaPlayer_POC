@@ -57,7 +57,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:orientation="horizontal"
-        android:weightSum="3">
+        android:weightSum="5">
+
+        <ImageView
+            android:id="@+id/buttonPlayBack"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:src="@drawable/baseline_skip_previous_24"
+            app:tint="@color/black"/>
+
 
         <ImageView
             android:id="@+id/buttonPause"
@@ -83,5 +92,14 @@
             android:layout_weight="1"
             android:src="@drawable/stop"
             app:tint="@color/black" />
+
+        <ImageView
+            android:id="@+id/buttonPlayNext"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:src="@drawable/baseline_skip_next_24"
+            app:tint="@color/black"/>
+
     </LinearLayout>
 </LinearLayout>
